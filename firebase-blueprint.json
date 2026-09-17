@@ -1,0 +1,116 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Polytechnic student profile including roll, department, semester, and verification status.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "auth_user_id": { "type": "string" },
+        "full_name": { "type": "string" },
+        "student_id": { "type": "string" },
+        "institute_id": { "type": "string" },
+        "department_id": { "type": "string" },
+        "semester_id": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "avatar_url": { "type": "string" },
+        "id_card_url": { "type": "string" },
+        "verification_status": { "type": "string", "enum": ["unverified", "pending", "verified", "rejected"] },
+        "verification_rejection_reason": { "type": "string" },
+        "account_status": { "type": "string", "enum": ["active", "warning", "restricted", "suspended"] },
+        "role": { "type": "string", "enum": ["user", "admin", "pickup_operator"] },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["auth_user_id", "full_name", "student_id", "email"]
+    },
+    "BookListing": {
+      "title": "BookListing",
+      "description": "Used Polytechnic textbook listing uploaded by a student seller.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "seller_id": { "type": "string" },
+        "title": { "type": "string" },
+        "author": { "type": "string" },
+        "subject_code": { "type": "string" },
+        "department_id": { "type": "string" },
+        "semester_id": { "type": "string" },
+        "description": { "type": "string" },
+        "edition": { "type": "string" },
+        "condition": { "type": "string", "enum": ["like_new", "good", "used", "heavily_used"] },
+        "writing_inside": { "type": "boolean" },
+        "highlighting": { "type": "boolean" },
+        "missing_pages": { "type": "boolean" },
+        "cover_damage": { "type": "boolean" },
+        "page_damage": { "type": "boolean" },
+        "original_price": { "type": "number" },
+        "selling_price": { "type": "number" },
+        "listing_status": { "type": "string", "enum": ["available", "reserved", "sold", "inactive"] },
+        "views_count": { "type": "number" },
+        "images": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["seller_id", "title", "subject_code", "selling_price", "listing_status"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Purchase transaction for a textbook including pickup point and pin validation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "order_number": { "type": "string" },
+        "buyer_id": { "type": "string" },
+        "seller_id": { "type": "string" },
+        "book_id": { "type": "string" },
+        "pickup_point_id": { "type": "string" },
+        "item_price": { "type": "number" },
+        "platform_fee": { "type": "number" },
+        "seller_payout": { "type": "number" },
+        "payment_status": { "type": "string", "enum": ["pending", "paid", "failed", "refunded", "released"] },
+        "payment_reference": { "type": "string" },
+        "order_status": { "type": "string", "enum": ["pending_payment", "paid", "waiting_for_dropoff", "dropped_off", "ready_for_pickup", "picked_up", "completed", "cancelled", "expired", "disputed"] },
+        "pickup_pin_hash": { "type": "string" },
+        "reservation_expires_at": { "type": "string", "format": "date-time" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["order_number", "buyer_id", "seller_id", "book_id", "item_price", "order_status"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notification for order updates, verification, and reminders.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "type": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "is_read": { "type": "boolean" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["user_id", "type", "title", "message"]
+    }
+  },
+  "firestore": {
+    "/profiles/{profileId}": {
+      "schema": "UserProfile",
+      "description": "User profile document keyed by user ID."
+    },
+    "/books/{bookId}": {
+      "schema": "BookListing",
+      "description": "Textbook listings collection accessible to students."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Order records for book purchases."
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User notifications collection."
+    }
+  }
+}

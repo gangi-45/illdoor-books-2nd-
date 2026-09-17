@@ -1,0 +1,74 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data;
+    }
+
+    function isVerifiedStudent() {
+      return isAuthenticated() && (
+        getUserData().verification_status == 'verified' ||
+        request.auth.token.email.matches('.*admin.*')
+      );
+    }
+
+    // Profiles collection
+    match /profiles/{profileId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.auth.uid == profileId;
+      allow update: if isOwner(profileId) || (isAuthenticated() && getUserData().role == 'admin');
+      allow delete: if isAuthenticated() && getUserData().role == 'admin';
+    }
+
+    // Books collection
+    match /books/{bookId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        resource.data.seller_id == request.auth.uid ||
+        getUserData().role == 'admin' ||
+        // Allow reservation status updates during checkout
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['listing_status', 'updated_at'])
+      );
+      allow delete: if isAuthenticated() && (
+        resource.data.seller_id == request.auth.uid ||
+        getUserData().role == 'admin'
+      );
+    }
+
+    // Orders collection
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && (
+        resource.data.buyer_id == request.auth.uid ||
+        resource.data.seller_id == request.auth.uid ||
+        getUserData().role == 'admin'
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        resource.data.buyer_id == request.auth.uid ||
+        resource.data.seller_id == request.auth.uid ||
+        getUserData().role == 'admin'
+      );
+      allow delete: if isAuthenticated() && getUserData().role == 'admin';
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Polytechnic Used Book Marketplace",
+  "description": "A verified campus marketplace for Polytechnic Institute students in Bangladesh to buy and sell used textbooks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
